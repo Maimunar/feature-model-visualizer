@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import Input from "./Input";
-import Output from "./Output";
+import dynamic from "next/dynamic";
+
+const Input = dynamic(() => import("./Input"), { ssr: false });
+const Output = dynamic(() => import("./Output"), { ssr: false });
 
 export default function Home() {
   const [input, setInput] = useState("");

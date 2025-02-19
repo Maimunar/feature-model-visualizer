@@ -1,5 +1,4 @@
 import beautify from "json-beautify";
-// @ts-expect-error no-import
 import utilsFactoryBuilder from "./treeUtils";
 import { Box, FeatureModel, placeholder } from "./model";
 
