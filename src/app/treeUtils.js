@@ -101,7 +101,6 @@ export default function () {
     window.removeEventListener("mousemove", box_move_step);
     window.removeEventListener("mouseup", box_move_stop);
     if (box_moving) {
-      console.log(box_moving);
       const { x, y, childstyle, parentstyle } = box_moving;
       const name = box_moving.t.firstChild.data;
       const childrenRelation = parentStyles[parentstyle];
