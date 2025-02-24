@@ -21,6 +21,8 @@ const BaseFeatureSchema = z.object({
   name: z.string(),
   parentRelation: ParentRelationSchema.optional(),
   childrenRelation: ChildrenRelationSchema.optional(),
+  x: z.number().optional(),
+  y: z.number().optional(),
   box: BoxSchema.optional(),
 });
 
@@ -32,11 +34,8 @@ export const FeatureSchema: z.ZodType<Feature> = BaseFeatureSchema.extend({
   children: z.lazy(() => FeatureSchema.array()).optional(),
 });
 
-export const FeatureModelSchema = z.object({
-  name: z.string(),
+export const FeatureModelSchema = BaseFeatureSchema.extend({
   children: z.array(FeatureSchema),
-  childrenRelation: ChildrenRelationSchema.optional(),
-  box: BoxSchema.optional(),
   requires: z.array(z.array(z.string())).optional(),
   excludes: z.array(z.array(z.string())).optional(),
 });
