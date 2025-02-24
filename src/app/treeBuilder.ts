@@ -1,11 +1,15 @@
+import { Dispatch, SetStateAction } from "react";
 import {
   Feature,
   FeatureModel,
-  FeatureModelSchema,
   getChildrenRelation,
   getParentRelation,
 } from "./model";
-import { getInputUpdatedXY, treeBuilder } from "./utils";
+import {
+  getInputUpdatedXY,
+  removeAllBoxProperties,
+  treeBuilder,
+} from "./utils";
 function assignCoordinates(
   root: FeatureModel,
   horizontalSpacing = 80, // Space between items
@@ -76,45 +80,14 @@ function assignCoordinates(
   });
 }
 
-export const buildTree = (input: string) => {
-  let model: FeatureModel;
-  try {
-    const data = JSON.parse(input);
-    model = FeatureModelSchema.parse(data);
-  } catch (err) {
-    console.log(err);
-    return {
-      error: "Please provide a valid Feature Model",
-      model: undefined,
-    };
-  }
-
+export const buildTree = (
+  model: FeatureModel,
+  setInput: Dispatch<SetStateAction<FeatureModel | undefined>>,
+) => {
   assignCoordinates(model);
   const builder = treeBuilder();
-  const callbackOnRootMove = (x: number, y: number) => {
-    const newInput = getInputUpdatedXY(
-      model,
-      model.name,
-      getParentRelation(model.parentRelation),
-      getChildrenRelation(model.childrenRelation),
-      x,
-      y,
-    );
-    console.log(newInput);
-  };
 
-  const root = builder.createBox(
-    model.name,
-    model.box?.x || 50,
-    model.box?.y || 50,
-    "none",
-    getChildrenRelation(model.childrenRelation),
-    callbackOnRootMove,
-  );
-
-  model.box = root;
-
-  const queue = [...model.children];
+  const queue: (FeatureModel | Feature)[] = [model];
 
   while (queue.length > 0) {
     const levelSize = Math.min(queue.length, 5);
@@ -122,16 +95,22 @@ export const buildTree = (input: string) => {
     for (let i = 0; i < levelSize; i++) {
       const current = queue.shift()!;
 
-      const callbackOnBoxMove = (x: number, y: number) => {
+      const callbackOnBoxMove = (
+        name: string,
+        parentRelation: "mandatory" | "optional" | "none",
+        childrenRelation: "and" | "or" | "xor",
+        x: number,
+        y: number,
+      ) => {
         const newInput = getInputUpdatedXY(
           model,
-          current.name,
-          getParentRelation(current.parentRelation),
-          getChildrenRelation(current.childrenRelation),
+          name,
+          parentRelation,
+          childrenRelation,
           x,
           y,
         );
-        console.log(newInput);
+        setInput(newInput);
       };
 
       const box = builder.createBox(
@@ -162,8 +141,7 @@ export const buildTree = (input: string) => {
     });
   }
 
-  return {
-    error: null,
-    model,
-  };
+  removeAllBoxProperties(model);
+
+  return model;
 };

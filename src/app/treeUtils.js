@@ -30,7 +30,7 @@ export default function () {
     y,
     childstyle,
     parentstyle,
-    callbackOnMove, // (x, y) => void
+    callbackOnMove, // (name, parentRelation, childrenRelation, x, y) => void
   ) {
     let box = create_box_element(description, x, y, childstyle, parentstyle);
     box.g.onmousedown = function (ev) {
@@ -93,12 +93,20 @@ export default function () {
     box_moving.y = y - box_clickoff.y;
     box_update_complete(box_moving);
   };
+
+  const childStyles = { M: "mandatory", O: "optional", C: "none" };
+  const parentStyles = { A: "and", O: "or", X: "xor" };
+
   const box_move_stop = (callbackOnMove) => () => {
     window.removeEventListener("mousemove", box_move_step);
     window.removeEventListener("mouseup", box_move_stop);
     if (box_moving) {
-      const { x, y } = box_moving;
-      callbackOnMove(x, y);
+      console.log(box_moving);
+      const { x, y, childstyle, parentstyle } = box_moving;
+      const name = box_moving.t.firstChild.data;
+      const childrenRelation = parentStyles[parentstyle];
+      const parentRelation = childStyles[childstyle];
+      callbackOnMove(name, parentRelation, childrenRelation, x, y);
     }
     box_moving = null;
   };

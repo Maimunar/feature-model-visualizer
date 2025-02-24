@@ -1,27 +1,24 @@
-import { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useMemo } from "react";
+
 import { buildTree } from "./treeBuilder";
 import { FeatureModel } from "./model";
 import { getExcludes, getRequires } from "./utils";
 
 export default function Output({
   input,
-  setError,
+  setInput,
 }: {
-  input: string;
-  error: string;
-  setError: Dispatch<SetStateAction<string>>;
+  input: FeatureModel | undefined;
+  setInput: Dispatch<SetStateAction<FeatureModel | undefined>>;
 }) {
-  const [model, setModel] = useState<FeatureModel | undefined>(undefined);
   useEffect(() => {
     if (input) {
-      const { error, model } = buildTree(input);
-      setError(error || "");
-      setModel(model);
+      buildTree(input, setInput);
     }
-  }, [input, setError]);
+  }, [input, setInput]);
 
-  const requires = useMemo(() => getRequires(model), [model]);
-  const excludes = useMemo(() => getExcludes(model), [model]);
+  const requires = useMemo(() => getRequires(input), [input]);
+  const excludes = useMemo(() => getExcludes(input), [input]);
   return (
     <div className="w-2/3 flex bg-gray-200 p-8 mr-8 rounded flex-col">
       <div className="flex gap-8">

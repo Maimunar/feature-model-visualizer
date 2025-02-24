@@ -1,14 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
+import { FeatureModel, placeholder } from "./model";
 
-const Input = dynamic(() => import("./Input"), { ssr: false });
 const Output = dynamic(() => import("./Output"), { ssr: false });
+const Input = dynamic(() => import("./Input"), { ssr: false });
 
 export default function Home() {
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState<FeatureModel | undefined>();
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    setInput(placeholder);
+  }, []);
+
   return (
     <div className="flex flex-col">
       <h1 className="text-2xl p-8 h-20 text-center font-bold">
@@ -17,7 +23,7 @@ export default function Home() {
       {error && <p className="text-red-500 text-center">{error}</p>}
       <main className="flex">
         <Input input={input} setInput={setInput} setError={setError} />
-        <Output input={input} error={error} setError={setError} />
+        <Output input={input} setInput={setInput} />
       </main>
       <Footer />
     </div>
