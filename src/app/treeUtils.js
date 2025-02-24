@@ -24,10 +24,17 @@ export default function () {
   const PARENT_NORMAL = "A",
     PARENT_OR = "O";
 
-  const create_box = function (description, x, y, childstyle, parentstyle) {
+  const create_box = function (
+    description,
+    x,
+    y,
+    childstyle,
+    parentstyle,
+    callbackOnMove, // (x, y) => void
+  ) {
     let box = create_box_element(description, x, y, childstyle, parentstyle);
     box.g.onmousedown = function (ev) {
-      box_start_move(box, ev);
+      box_start_move(box, ev, callbackOnMove);
     };
     box_update_complete(box);
     return box;
@@ -67,18 +74,18 @@ export default function () {
 
   let box_moving = null;
   let box_clickoff = null;
-  const box_start_move = function (box, ev) {
+  const box_start_move = (box, ev, callbackOnMove) => {
     if (box_moving != null) return;
     box_moving = box;
     window.addEventListener("mousemove", box_move_step);
-    window.addEventListener("mouseup", box_move_stop);
+    window.addEventListener("mouseup", box_move_stop(callbackOnMove));
     /* Offset in the box to avoid jumping of the box */
     box_clickoff = {
       x: ev.clientX - svg_left - box.x,
       y: ev.clientY - svg_top - box.y,
     };
   };
-  const box_move_step = function (ev) {
+  const box_move_step = (ev) => {
     if (box_moving == null) return;
     var x = ev.clientX - svg_left,
       y = ev.clientY - svg_top;
@@ -86,9 +93,13 @@ export default function () {
     box_moving.y = y - box_clickoff.y;
     box_update_complete(box_moving);
   };
-  const box_move_stop = function () {
+  const box_move_stop = (callbackOnMove) => () => {
     window.removeEventListener("mousemove", box_move_step);
     window.removeEventListener("mouseup", box_move_stop);
+    if (box_moving) {
+      const { x, y } = box_moving;
+      callbackOnMove(x, y);
+    }
     box_moving = null;
   };
   const box_update_complete = function (box) {
