@@ -5,7 +5,7 @@ import {
   getChildrenRelation,
   getParentRelation,
 } from "./model";
-import { treeBuilder } from "./utils";
+import { getInputUpdatedXY, treeBuilder } from "./utils";
 function assignCoordinates(
   root: FeatureModel,
   horizontalSpacing = 80, // Space between items
@@ -60,17 +60,20 @@ function assignCoordinates(
     x = 0;
     y += verticalSpacing;
     rowNodes.forEach((node) => {
+      if (node.x) {
+        // @ts-expect-error box is optional
+        node.box = { x: node.x, y: node.y || y };
+        return;
+      }
       x += horizontalSpacing / 2 + node.name.length * letterSpacing;
       // @ts-expect-error box is optional
       node.box = {
         x,
-        y,
+        y: node.y || y,
       };
       x += horizontalSpacing / 2 + node.name.length * letterSpacing;
     });
   });
-
-  //adjustParentPositions(root);
 }
 
 export const buildTree = (input: string) => {
@@ -79,7 +82,7 @@ export const buildTree = (input: string) => {
     const data = JSON.parse(input);
     model = FeatureModelSchema.parse(data);
   } catch (err) {
-    console.error(err);
+    console.log(err);
     return {
       error: "Please provide a valid Feature Model",
       model: undefined,
@@ -88,13 +91,27 @@ export const buildTree = (input: string) => {
 
   assignCoordinates(model);
   const builder = treeBuilder();
+  const callbackOnRootMove = (x: number, y: number) => {
+    const newInput = getInputUpdatedXY(
+      model,
+      model.name,
+      getParentRelation(model.parentRelation),
+      getChildrenRelation(model.childrenRelation),
+      x,
+      y,
+    );
+    console.log(newInput);
+  };
+
   const root = builder.createBox(
     model.name,
     model.box?.x || 50,
     model.box?.y || 50,
     "none",
     getChildrenRelation(model.childrenRelation),
+    callbackOnRootMove,
   );
+
   model.box = root;
 
   const queue = [...model.children];
@@ -105,12 +122,25 @@ export const buildTree = (input: string) => {
     for (let i = 0; i < levelSize; i++) {
       const current = queue.shift()!;
 
+      const callbackOnBoxMove = (x: number, y: number) => {
+        const newInput = getInputUpdatedXY(
+          model,
+          current.name,
+          getParentRelation(current.parentRelation),
+          getChildrenRelation(current.childrenRelation),
+          x,
+          y,
+        );
+        console.log(newInput);
+      };
+
       const box = builder.createBox(
         current.name,
         current.box?.x || 50,
         current.box?.y || 50,
         getParentRelation(current.parentRelation),
         getChildrenRelation(current.childrenRelation),
+        callbackOnBoxMove,
       );
 
       current.box = box;
@@ -137,25 +167,3 @@ export const buildTree = (input: string) => {
     model,
   };
 };
-
-//const getTreeHeight = (root: FeatureModel) => {
-//  if (!root) return 0; // An empty tree has height 0
-//
-//  let height = 1;
-//  const queue: Feature[] = [...root.children];
-//
-//  while (queue.length > 0) {
-//    const levelSize = queue.length;
-//
-//    for (let i = 0; i < levelSize; i++) {
-//      const currentNode = queue.shift()!;
-//      if (!currentNode.children) continue;
-//
-//      queue.push(...currentNode.children);
-//    }
-//
-//    height++;
-//  }
-//
-//  return height;
-//};
