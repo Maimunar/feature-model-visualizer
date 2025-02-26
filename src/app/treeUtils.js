@@ -262,8 +262,8 @@ export default function () {
     svg_left = bb.left;
   };
   const fit_screen_size = function () {
-    svg.setAttribute("width", floor(window.innerWidth) + "px");
-    svg.setAttribute("height", floor(window.innerHeight) + "px");
+    svg.setAttribute("width", "100%");
+    svg.setAttribute("height", window.outerHeight + "px");
     update_svg_pos();
   };
   window.addEventListener("resize", fit_screen_size);
