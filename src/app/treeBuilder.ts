@@ -14,7 +14,7 @@ function assignCoordinates(
   root: FeatureModel,
   horizontalSpacing = 80, // Space between items
   verticalSpacing = 110,
-  maxPerRow = 5,
+  maxPerRow = 10,
   letterSpacing = 2,
 ): void {
   if (!root) return;
@@ -90,7 +90,7 @@ export const buildTree = (
   const queue: (FeatureModel | Feature)[] = [model];
 
   while (queue.length > 0) {
-    const levelSize = Math.min(queue.length, 5);
+    const levelSize = Math.min(queue.length, 10);
 
     for (let i = 0; i < levelSize; i++) {
       const current = queue.shift()!;
