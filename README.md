@@ -1,3 +1,9 @@
+# Feature Model Visualizer
+A web visualizer for feature models that is based on JSON input/output
+![image](https://github.com/user-attachments/assets/e3bf03cb-2e56-4105-9075-1921b6a69d1b)
+
+
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
